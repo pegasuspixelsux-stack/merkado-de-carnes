@@ -9,7 +9,7 @@ export const INTERVAL_OPTIONS_MS = [3000, 5000, 7000, 10000] as const;
 // until mobile versions are added. Swap the images, or turn the text off, from the admin Hero tab.
 export const DEFAULT_HERO_CONFIG: HeroConfig = {
   showTextOverlay: true,
-  heading: "Carnes frescas de Maldonado",
+  heading: "El punto exacto de la felicidad",
   subtext: "Cortes seleccionados, achuras y packs parrilleros. Elegí lo que necesitás y pedí por WhatsApp.",
   desktopSlides: [
     { id: "hero-steak", imageUrl: "/hero_images/steak.jfif", altText: "Bife de carne vacuna" },
