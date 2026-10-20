@@ -36,7 +36,7 @@ interface CartState {
 }
 
 type Action =
-  | { type: "add"; product: CartProduct; ref: string }
+  | { type: "add"; product: CartProduct; quantity: number; notes: string; ref: string }
   | { type: "remove"; productId: string }
   | { type: "quantity"; productId: string; quantity: number }
   | { type: "fulfillment"; value: Fulfillment }
@@ -61,11 +61,17 @@ function reducer(state: CartState, action: Action): CartState {
   switch (action.type) {
     case "add": {
       const found = state.items.find((i) => i.product.id === action.product.id);
+      const notes = action.notes.trim();
       const items = found
         ? state.items.map((i) =>
-            i.product.id === action.product.id ? { ...i, quantity: clampQty(i.quantity + 1) } : i,
+            i.product.id === action.product.id
+              ? { ...i, quantity: clampQty(i.quantity + action.quantity), selectedCutNotes: notes || i.selectedCutNotes }
+              : i,
           )
-        : [...state.items, { product: action.product, quantity: 1 }];
+        : [
+            ...state.items,
+            { product: action.product, quantity: clampQty(action.quantity), ...(notes ? { selectedCutNotes: notes } : {}) },
+          ];
       return { ...state, items, orderRef: state.orderRef || action.ref };
     }
     case "remove": {
@@ -117,7 +123,7 @@ export function newOrderRef(): string {
 interface CartApi extends CartState {
   itemCount: number;
   quantityOf: (productId: string) => number;
-  addItem: (product: CartProduct) => void;
+  addItem: (product: CartProduct, quantity?: number, notes?: string) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   setFulfillment: (type: Fulfillment) => void;
@@ -142,10 +148,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       ...state,
       itemCount: state.items.length,
       quantityOf: (id) => state.items.find((i) => i.product.id === id)?.quantity ?? 0,
-      addItem: (p) => {
+      addItem: (p, quantity = 1, notes = "") => {
         dispatch({
           type: "add",
           product: { id: p.id, title: p.title, price: p.price, unit: p.unit },
+          quantity,
+          notes,
           ref: newOrderRef(),
         });
         showToast("Agregado al pedido");

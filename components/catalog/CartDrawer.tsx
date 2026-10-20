@@ -103,7 +103,7 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
           <ul className="divide-y divide-border">
-            {cart.items.map(({ product, quantity }) => (
+            {cart.items.map(({ product, quantity, selectedCutNotes }) => (
               <li key={product.id} className="py-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -111,6 +111,7 @@ export default function CartDrawer({ open, onClose }: { open: boolean; onClose: 
                     <p className="text-xs text-muted-foreground">
                       {formatPrice(product.price)} / {product.unit}
                     </p>
+                    {selectedCutNotes && <p className="mt-0.5 text-xs italic text-muted-foreground">{selectedCutNotes}</p>}
                   </div>
                   <p className="shrink-0 text-sm font-semibold tabular-nums text-foreground">
                     {formatPrice(product.price * quantity)}

@@ -49,6 +49,7 @@ export function buildOrderMessage(args: {
     lines.push(
       `• ${formatQuantity(i.quantity)}x ${i.product.title} (${money(i.product.price)}/${i.product.unit}) - ${money(i.product.price * i.quantity)}`,
     );
+    if (i.selectedCutNotes) lines.push(`   ↳ ${i.selectedCutNotes}`);
   }
   lines.push("", "---", `📦 *Subtotal:* ${money(totals.subtotal)}`);
   if (settings.taxRate > 0) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Beef, Drumstick, Flame, Ham, Package, Search, SearchX, SlidersHorizontal, Store, Utensils } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -11,7 +11,9 @@ import { usePastaInventory } from "@/hooks/usePastaInventory";
 import HeroSlideshow from "@/components/HeroSlideshow";
 import { useHeroConfig } from "@/hooks/useHeroConfig";
 import CartBar from "./CartBar";
+import ItemDetailSheet from "./ItemDetailSheet";
 import PastaCard from "./PastaCard";
+import type { PastaItem } from "@/types/pasta";
 
 type Filter = string; // a category id, or "all"
 type Sort = "default" | "price-asc" | "price-desc" | "name";
@@ -25,8 +27,6 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   paquetes: Package,
 };
 
-const pill =
-  "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors";
 const pillOff =
   "border-walnut/15 text-muted hover:border-walnut/30 hover:text-walnut dark:border-white/10 dark:text-zinc-400 dark:hover:border-white/25 dark:hover:text-white";
 const pillOn =
@@ -47,6 +47,15 @@ export default function CatalogView() {
   const setCategory = (id: Filter) => setPicked({ from: catParam, id });
   // If the chosen category was deleted in the meantime, fall back to All instead of an empty grid.
   const category = chosen === "all" || categories.some((c) => c.id === chosen) ? chosen : "all";
+
+  // The sheet keeps the last item while it slides away, so `open` is separate from the item.
+  const [detail, setDetail] = useState<{ item: PastaItem; seq: number } | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const openDetail = (item: PastaItem) => {
+    setDetail((d) => ({ item, seq: (d?.seq ?? 0) + 1 }));
+    setDetailOpen(true);
+  };
+  const closeDetail = useCallback(() => setDetailOpen(false), []);
 
   const [showFilters, setShowFilters] = useState(false);
   const [sort, setSort] = useState<Sort>("default");
@@ -242,12 +251,13 @@ export default function CatalogView() {
         ) : (
           <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {visible.map((item) => (
-              <PastaCard key={item.id} item={item} />
+              <PastaCard key={item.id} item={item} onSelect={openDetail} />
             ))}
           </ul>
         )}
       </main>
 
+      <ItemDetailSheet seq={detail?.seq ?? 0} item={detail?.item ?? null} open={detailOpen} onClose={closeDetail} />
       <CartBar />
     </>
   );

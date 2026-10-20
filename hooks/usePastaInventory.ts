@@ -23,7 +23,9 @@ export function usePastaInventory() {
     items,
     hydrated,
     create: pastaBackend.create,
+    createMany: pastaBackend.createMany,
     update: pastaBackend.update,
+    updateMany: pastaBackend.updateMany,
     remove: pastaBackend.remove,
   };
 }

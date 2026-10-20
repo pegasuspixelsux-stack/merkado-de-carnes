@@ -13,6 +13,7 @@
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "read-excel-file": "^9.3.12",
     "simple-icons": "^16.35.0"
   },
   "devDependencies": {
@@ -23,6 +24,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "write-excel-file": "^4.1.1"
   }
 }

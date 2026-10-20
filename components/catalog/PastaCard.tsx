@@ -1,25 +1,26 @@
-import { Minus, Plus } from "lucide-react";
-import { MAX_QUANTITY, QUANTITY_STEP, useCart } from "@/store/useCart";
+import { ChevronRight } from "lucide-react";
 import type { PastaItem } from "@/types/pasta";
-import { formatPrice, formatQuantity } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 import FillText from "./FillText";
 import PastaImage from "./PastaImage";
 
 
-const stepBtn =
-  "grid h-8 w-8 shrink-0 place-items-center rounded-full text-walnut transition-all hover:bg-walnut/5 active:scale-[0.92] disabled:pointer-events-none disabled:text-zinc-300 sm:h-9 sm:w-9 dark:text-white dark:hover:bg-white/10 dark:disabled:text-zinc-700";
-
 // Two columns at every width. The image is a flush 1:1 square on the left and sets the card's
 // height. The text column is sized to fit inside that square, so the description is clamped to
 // fewer lines on small screens instead of making the card taller.
-export default function PastaCard({ item }: { item: PastaItem }) {
-  const cart = useCart();
-  const quantity = cart.quantityOf(item.id);
-  const onQuantityChange = (next: number) => cart.updateQuantity(item.id, next);
+export default function PastaCard({ item, onSelect }: { item: PastaItem; onSelect: (item: PastaItem) => void }) {
   const soldOut = !item.available;
 
   return (
-    <li className="group grid grid-cols-[5fr_6fr] overflow-hidden rounded-[14px] border border-walnut/15 bg-cream/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-walnut/30 sm:grid-cols-[2fr_3fr] lg:grid-cols-1 dark:border-white/10 dark:bg-card dark:hover:border-white/25">
+    <li className="group relative grid cursor-pointer grid-cols-[5fr_6fr] overflow-hidden rounded-[14px] border border-walnut/15 bg-cream/70 transition-all duration-300 hover:-translate-y-0.5 hover:border-walnut/30 sm:grid-cols-[2fr_3fr] lg:grid-cols-1 dark:border-white/10 dark:bg-card dark:hover:border-white/25">
+      {/* The whole card opens the item's detail sheet. */}
+      <button
+        type="button"
+        onClick={() => onSelect(item)}
+        aria-label={`Ver ${item.title}`}
+        className="absolute inset-0 z-10 rounded-[14px]"
+      />
+
       {/* Left: image, no padding, always square */}
       <div className="relative aspect-square w-full">
         <PastaImage
@@ -35,7 +36,7 @@ export default function PastaCard({ item }: { item: PastaItem }) {
         )}
       </div>
 
-      {/* Right: title, description, then quantity stepper and price on one row.
+      {/* Right: title, description, then price and a chevron on one row.
           Absolutely filled so the square image alone decides the card height. */}
       <div className="relative min-w-0">
         <div className="absolute inset-0 flex flex-col overflow-hidden p-3.5 sm:p-6 md:p-8 lg:static lg:p-5">
@@ -49,62 +50,21 @@ export default function PastaCard({ item }: { item: PastaItem }) {
             />
           </div>
 
-          <div className="mt-auto flex items-end lg:pt-4 justify-between gap-2 sm:gap-3">
-            {quantity === 0 && !soldOut ? (
-              <button
-                type="button"
-                onClick={() => cart.addItem(item)}
-                aria-label={`Agregar ${item.title} al pedido`}
-                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 active:scale-[0.96] sm:px-4"
-              >
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Agregar
-              </button>
-            ) : (
-            <div>
-              <p id={`qty-${item.id}`} className="mb-1 hidden text-xs text-muted sm:block dark:text-zinc-400">
-                Cantidad
-              </p>
-              <div
-                role="group"
-                aria-label={`Cantidad de ${item.title}`}
-                className="inline-flex items-center rounded-full border border-walnut/15 p-0.5 dark:border-white/10"
-              >
-                <button
-                  type="button"
-                  onClick={() => onQuantityChange(quantity - QUANTITY_STEP)}
-                  disabled={soldOut || quantity <= 0}
-                  aria-label={`Quitar una unidad de ${item.title}`}
-                  className={stepBtn}
-                >
-                  <Minus className="h-4 w-4" aria-hidden="true" />
-                </button>
-                <output
-                  aria-live="polite"
-                  className="w-9 text-center text-sm font-semibold tabular-nums text-walnut sm:w-10 dark:text-white"
-                >
-                  {formatQuantity(quantity)}
-                </output>
-                <button
-                  type="button"
-                  onClick={() => onQuantityChange(quantity + QUANTITY_STEP)}
-                  disabled={soldOut || quantity >= MAX_QUANTITY}
-                  aria-label={`Agregar una unidad de ${item.title}`}
-                  className={stepBtn}
-                >
-                  <Plus className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </div>
-            </div>
-            )}
-
-            <div className="min-w-0 text-right">
-              <p className="mb-1 hidden text-xs text-muted sm:block dark:text-zinc-400">Precio</p>
+          <div className="mt-auto flex items-end justify-between gap-2 sm:gap-3 lg:pt-4">
+            <div className="min-w-0">
               <p className="text-base font-semibold leading-tight tracking-tight text-walnut sm:text-lg dark:text-white">
                 {formatPrice(item.price)}
               </p>
               <p className="truncate text-xs leading-tight text-muted dark:text-zinc-400">/ {item.unit}</p>
             </div>
+            {/* Looks like a button; the card-wide overlay above is what actually takes the click. */}
+            <span
+              aria-hidden="true"
+              className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary py-2 pl-3.5 pr-2.5 text-sm font-medium text-primary-foreground transition-all group-hover:bg-primary/90 group-active:scale-[0.97] sm:pl-4"
+            >
+              {soldOut ? "Ver" : "Comprar"}
+              <ChevronRight className="h-4 w-4" />
+            </span>
           </div>
         </div>
       </div>

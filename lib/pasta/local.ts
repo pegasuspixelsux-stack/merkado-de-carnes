@@ -91,8 +91,17 @@ export const localBackend: PastaBackend = {
     commit([item, ...load()]);
     return item;
   },
+  async createMany(data) {
+    const created = data.map((d): PastaItem => ({ ...d, id: newId() }));
+    commit([...created, ...load()]);
+    return created;
+  },
   async update(id, patch) {
     commit(load().map((i) => (i.id === id ? { ...i, ...patch } : i)));
+  },
+  async updateMany(patches) {
+    const byId = new Map(patches.map((p) => [p.id, p.patch]));
+    commit(load().map((i) => (byId.has(i.id) ? { ...i, ...byId.get(i.id) } : i)));
   },
   async remove(id) {
     commit(load().filter((i) => i.id !== id));
