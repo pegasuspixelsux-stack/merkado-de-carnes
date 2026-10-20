@@ -95,7 +95,7 @@ function splitInTwo(text: string): string[] {
 }
 
 const arrowBtn =
-  "absolute top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/30 text-white backdrop-blur-md transition-colors hover:bg-black/50 active:scale-95 sm:h-11 sm:w-11";
+  "absolute top-1/2 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/30 text-white backdrop-blur-md transition-colors hover:bg-black/50 active:scale-95 md:grid";
 
 // A full-width, square hero driven by HeroConfig. It crossfades between slides, optionally shows
 // the heading and supporting text over them, and is a size container, so the type scales with the
