@@ -10,7 +10,7 @@ export const INTERVAL_OPTIONS_MS = [3000, 5000, 7000, 10000] as const;
 // slides (cropped square) until square mobile versions are added. Turn the overlay on, or swap the
 // images, from the admin Hero tab.
 export const DEFAULT_HERO_CONFIG: HeroConfig = {
-  showTextOverlay: false,
+  showTextOverlay: true,
   heading: "Carnes frescas de Maldonado",
   subtext: "Cortes seleccionados, achuras y packs parrilleros. Elegí lo que necesitás y pedí por WhatsApp.",
   desktopSlides: [

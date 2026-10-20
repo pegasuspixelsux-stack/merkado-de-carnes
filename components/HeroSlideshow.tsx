@@ -38,7 +38,13 @@ function useDevice(): "desktop" | "mobile" | null {
 }
 
 // One slide image. A broken link hides itself so the solid background shows instead of a broken icon.
-function SlideImage({ slide, active, index, count, first }: {
+function SlideImage({
+  slide,
+  active,
+  index,
+  count,
+  first,
+}: {
   slide: Slide;
   active: boolean;
   index: number;
@@ -73,6 +79,21 @@ function SlideImage({ slide, active, index, count, first }: {
   );
 }
 
+// Breaks a heading into two rows at the space closest to its middle. One-word headings stay whole.
+function splitInTwo(text: string): string[] {
+  const t = text.trim();
+  const mid = t.length / 2;
+  let best = -1;
+  for (let i = 0; i < t.length; i++) {
+    if (
+      t[i] === " " &&
+      (best === -1 || Math.abs(i - mid) < Math.abs(best - mid))
+    )
+      best = i;
+  }
+  return best === -1 ? [t] : [t.slice(0, best), t.slice(best + 1)];
+}
+
 const arrowBtn =
   "absolute top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/30 text-white backdrop-blur-md transition-colors hover:bg-black/50 active:scale-95 sm:h-11 sm:w-11";
 
@@ -98,7 +119,9 @@ export default function HeroSlideshow({ config }: { config: HeroConfig }) {
   // slides would show a still image, so it borrows the desktop set when that one can rotate. If a
   // set is empty, the other one fills in so the hero is never bare.
   const device = useDevice();
-  const mobileSet = mobileSlides.length >= 2 || (mobileSlides.length > 0 && desktopSlides.length < 2);
+  const mobileSet =
+    mobileSlides.length >= 2 ||
+    (mobileSlides.length > 0 && desktopSlides.length < 2);
   const slides =
     device === null
       ? []
@@ -120,12 +143,16 @@ export default function HeroSlideshow({ config }: { config: HeroConfig }) {
 
   // Slides can be removed in the admin while this is mounted, so keep the index in range.
   const current = count ? index % count : 0;
-  const autoplaying = enableAutoplay && count > 1 && !reducedMotion && !userPaused && !engaged;
+  const autoplaying =
+    enableAutoplay && count > 1 && !reducedMotion && !userPaused && !engaged;
 
   // The timer restarts whenever `current` changes, so manual navigation resets the countdown.
   useEffect(() => {
     if (!autoplaying) return;
-    const t = setTimeout(() => setIndex((current + 1) % count), autoplayIntervalMs);
+    const t = setTimeout(
+      () => setIndex((current + 1) % count),
+      autoplayIntervalMs,
+    );
     return () => clearTimeout(t);
   }, [autoplaying, current, count, autoplayIntervalMs]);
 
@@ -149,7 +176,10 @@ export default function HeroSlideshow({ config }: { config: HeroConfig }) {
         />
       )}
 
-      <div className="absolute inset-0" aria-live={autoplaying ? "off" : "polite"}>
+      <div
+        className="absolute inset-0"
+        aria-live={autoplaying ? "off" : "polite"}
+      >
         {slides.map((slide, i) => (
           <SlideImage
             key={slide.id}
@@ -167,7 +197,10 @@ export default function HeroSlideshow({ config }: { config: HeroConfig }) {
         <div
           aria-hidden="true"
           className="absolute inset-0 transition-opacity duration-300 motion-reduce:transition-none"
-          style={{ backgroundColor: overlayColor, opacity: overlayColorOpacity / 100 }}
+          style={{
+            backgroundColor: overlayColor,
+            opacity: overlayColorOpacity / 100,
+          }}
         />
       )}
       {overlayDarkness > 0 && (
@@ -183,24 +216,38 @@ export default function HeroSlideshow({ config }: { config: HeroConfig }) {
         aria-hidden="true"
         className={`absolute inset-0 ${
           showTextOverlay
-            ? "bg-gradient-to-b from-black/55 via-black/45 to-black/65"
+            ? "bg-gradient-to-r from-black/75 via-black/35 to-transparent"
             : "bg-gradient-to-b from-transparent via-transparent to-black/20"
         }`}
       />
 
       {showTextOverlay ? (
-        <div className="pointer-events-none relative flex h-full flex-col items-center justify-center p-[clamp(1rem,5cqw,3rem)] text-center">
-          <h1
-            id="hero-title"
-            className="text-balance font-semibold leading-[1.02] tracking-tight text-white text-[clamp(1.75rem,8cqw,5rem)] [text-shadow:0_2px_24px_rgb(0_0_0/0.45)]"
-          >
-            {heading}
-          </h1>
-          {subtext && (
-            <p className="mt-[clamp(0.375rem,1.5cqw,1rem)] max-w-[34ch] text-pretty leading-snug text-white/85 text-[clamp(0.8125rem,2.4cqw,1.25rem)] [text-shadow:0_1px_12px_rgb(0_0_0/0.4)]">
-              {subtext}
-            </p>
-          )}
+        // Left-aligned on phones; a left-hand column from md up.
+        // The text block lines up with the 1440px page column on wide screens.
+        <div className="relative mx-auto h-full w-full max-w-[1440px]">
+          <div className="pointer-events-none relative flex h-full flex-col items-start justify-center p-[clamp(1rem,5cqw,3rem)] text-left md:w-[45%]">
+            <h1
+              id="hero-title"
+              className="text-balance font-semibold leading-[1.02] tracking-tight text-white text-[clamp(1.5rem,6cqw,4rem)] [text-shadow:0_2px_24px_rgb(0_0_0/0.45)]"
+            >
+              {splitInTwo(heading).map((line, i) => (
+                <span key={i} className="block">
+                  {line}
+                </span>
+              ))}
+            </h1>
+            {subtext && (
+              <p className="mt-[clamp(0.375rem,1.5cqw,1rem)] max-w-[34ch] text-pretty leading-snug text-white/85 text-[clamp(0.8125rem,2.4cqw,1.25rem)] [text-shadow:0_1px_12px_rgb(0_0_0/0.4)]">
+                {subtext}
+              </p>
+            )}
+            <a
+              href="#catalog"
+              className="pointer-events-auto mt-[clamp(0.75rem,2.5cqw,1.5rem)] inline-flex items-center rounded-full bg-chestnut px-[clamp(1rem,3cqw,2rem)] py-[clamp(0.5rem,1.4cqw,0.875rem)] text-[clamp(0.8125rem,1.8cqw,1.0625rem)] font-medium text-white transition-colors hover:bg-chestnut-hover"
+            >
+              Ver catálogo
+            </a>
+          </div>
         </div>
       ) : (
         // Text is off, but the page still needs a heading for screen readers and search engines.
@@ -211,10 +258,20 @@ export default function HeroSlideshow({ config }: { config: HeroConfig }) {
 
       {count > 1 && (
         <>
-          <button type="button" onClick={() => go(current - 1)} aria-label="Diapositiva anterior" className={`${arrowBtn} left-3 sm:left-5`}>
+          <button
+            type="button"
+            onClick={() => go(current - 1)}
+            aria-label="Diapositiva anterior"
+            className={`${arrowBtn} left-3 sm:left-5`}
+          >
             <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           </button>
-          <button type="button" onClick={() => go(current + 1)} aria-label="Diapositiva siguiente" className={`${arrowBtn} right-3 sm:right-5`}>
+          <button
+            type="button"
+            onClick={() => go(current + 1)}
+            aria-label="Diapositiva siguiente"
+            className={`${arrowBtn} right-3 sm:right-5`}
+          >
             <ChevronRight className="h-5 w-5" aria-hidden="true" />
           </button>
 
@@ -243,10 +300,18 @@ export default function HeroSlideshow({ config }: { config: HeroConfig }) {
             <button
               type="button"
               onClick={() => setUserPaused((p) => !p)}
-              aria-label={userPaused ? "Reanudar la presentación" : "Pausar la presentación"}
+              aria-label={
+                userPaused
+                  ? "Reanudar la presentación"
+                  : "Pausar la presentación"
+              }
               className="absolute bottom-3 right-3 grid h-9 w-9 place-items-center rounded-full bg-black/30 text-white backdrop-blur-md transition-colors hover:bg-black/50 sm:bottom-5 sm:right-5"
             >
-              {userPaused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}
+              {userPaused ? (
+                <Play className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Pause className="h-4 w-4" aria-hidden="true" />
+              )}
             </button>
           )}
         </>
