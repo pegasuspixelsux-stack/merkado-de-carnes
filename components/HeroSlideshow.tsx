@@ -232,7 +232,15 @@ export default function HeroSlideshow({ config }: { config: HeroConfig }) {
             >
               {splitInTwo(heading).map((line, i) => (
                 <span key={i} className="block">
-                  {line}
+                  {line.split(/(punto exacto)/i).map((part, j) =>
+                    /^punto exacto$/i.test(part) ? (
+                      <span key={j} className="text-amber-400">
+                        {part}
+                      </span>
+                    ) : (
+                      part
+                    ),
+                  )}
                 </span>
               ))}
             </h1>
